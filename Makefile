@@ -11,7 +11,7 @@ SRC=$(wildcard $(SRC_DIR)/*.cpp)
 OBJ=$(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o, $(SRC))
 
 GCC = g++
-GCCFLAGS = -Wall -Wextra -I$(INCLUDE_DIR) -L$(LIB_DIR) -l$(RAYLIB)
+GCCFLAGS = -Wall -Wextra -I$(INCLUDE_DIR)
 
 $(TARGET): $(OBJ)
 	$(GCC) $(GCCFLAGS) $^ -o $(TARGET)
