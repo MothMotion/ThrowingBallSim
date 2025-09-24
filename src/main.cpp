@@ -12,7 +12,7 @@
 #include <raylib.h>
 
 // Scale falloff value for smooth camera/
-constexpr double SFALLOFF = 0.99;
+constexpr double SFALLOFF = 0.9999;
 
 int main (int argc, char *argv[]) {
   if(argc != 13) {// x, y, radius, vx, vy, left_x, right_x, elevation, delta, eps, grav_x, grav_y
@@ -32,6 +32,7 @@ int main (int argc, char *argv[]) {
                eps = atof(argv[9]);
   // Time step
   double       delta = atof(argv[9]);
+  // Gravity
   const vec2 grav(atof(argv[11]), atof(argv[12])); 
 
   const int screenWidth = 800,
@@ -50,18 +51,20 @@ int main (int argc, char *argv[]) {
 
     vec2 max_view(radius, radius);
     double view_scale = 0;
+    double flight_time = 0;
 
     std::this_thread::sleep_for(std::chrono::milliseconds(1500));
     while(!registerHit(*steps[0], radius, eps, left_x, right_x, elevation) &&
           steps[0]->pos.y >= -eps) {
       nextStep(delta, grav, *steps[0], *steps[1]);
-      std::swap(steps[0], steps[1]); 
+      std::swap(steps[0], steps[1]);
+      flight_time += delta;
 
       // Visualisation, real time
       BeginDrawing();
         ClearBackground(RAYWHITE);
-        max_view.x = std::max(max_view.x * SFALLOFF, std::max(steps[0]->pos.x + radius/2, right_x + radius/2));
-        max_view.y = std::max(max_view.y * SFALLOFF, std::max(steps[0]->pos.y + radius/2, elevation));
+        max_view.x = std::max(max_view.x * SFALLOFF, std::max(steps[0]->pos.x + radius, right_x + radius));
+        max_view.y = std::max(max_view.y * SFALLOFF, std::max(steps[0]->pos.y + radius, elevation));
         view_scale = std::min(screenWidth / max_view.x, screenHeight / max_view.y); 
  
         drawStep(screenWidth, screenHeight, steps[0]->pos.x * view_scale, steps[0]->pos.y * view_scale, radius * view_scale,
@@ -80,7 +83,8 @@ int main (int argc, char *argv[]) {
     } else
       std::cout << "Hit ring\n";
     std::cout << "Throw accuracy: " << std::abs((right_x + left_x)/2 - steps[0]->pos.x) << "\n"
-              << "Current deviation: " << steps[1]->pos.y - steps[0]->pos.y << "\nRequered: " << eps << "\n";
+              << "Current deviation: " << steps[1]->pos.y - steps[0]->pos.y << "\nRequered: " << eps << "\n"
+              << "Flight Time: " << flight_time << "\n";
     std::this_thread::sleep_for(std::chrono::milliseconds(1500));
     delta *= 0.5; 
   } while(steps[1]->pos.y - steps[0]->pos.y > eps);
