@@ -1,6 +1,6 @@
 #include "program.h"
 #include "vec2.h"
-#include "display.h"
+// #include "display.h"
 
 #include <algorithm>
 #include <chrono>
@@ -9,10 +9,10 @@
 #include <thread>
 #include <utility>
 
-#include <raylib.h>
+//#include <raylib.h>
 
 // Scale falloff value for smooth camera/
-constexpr double SFALLOFF = 0.99;
+//constexpr double SFALLOFF = 0.99;
 
 int main (int argc, char *argv[]) {
   if(argc != 13) {// x, y, radius, vx, vy, left_x, right_x, elevation, delta, eps, grav_x, grav_y
@@ -34,12 +34,12 @@ int main (int argc, char *argv[]) {
   double       delta = atof(argv[9]);
   const vec2 grav(atof(argv[11]), atof(argv[12])); 
 
-  const int screenWidth = 800,
-            screenHeight = 450;
+  //const int screenWidth = 800,
+  //          screenHeight = 450;
 
-  InitWindow(screenWidth, screenHeight, "MatAn Simulaiton");
+  //InitWindow(screenWidth, screenHeight, "MatAn Simulaiton");
 
-  SetTargetFPS(240);
+  //SetTargetFPS(240);
 
   Step* steps[2]{new Step(), new Step};
 
@@ -48,8 +48,8 @@ int main (int argc, char *argv[]) {
     *steps[0] = Step(atof(argv[1]), atof(argv[2]), atof(argv[4]), atof(argv[5]));
     *steps[1] = Step();
 
-    vec2 max_view(radius, radius);
-    double view_scale = 0;
+    //vec2 max_view(radius, radius);
+    //double view_scale = 0;
 
     std::this_thread::sleep_for(std::chrono::milliseconds(1500));
     while(!registerHit(*steps[0], radius, eps, left_x, right_x, elevation) &&
@@ -58,7 +58,7 @@ int main (int argc, char *argv[]) {
       std::swap(steps[0], steps[1]); 
 
       // Visualisation, real time
-      BeginDrawing();
+      /* BeginDrawing();
         ClearBackground(RAYWHITE);
         max_view.x = std::max(max_view.x * SFALLOFF, std::max(steps[0]->pos.x + radius/2, right_x + radius/2));
         max_view.y = std::max(max_view.y * SFALLOFF, std::max(steps[0]->pos.y + radius/2, elevation));
@@ -68,7 +68,7 @@ int main (int argc, char *argv[]) {
                  left_x * view_scale, right_x * view_scale, elevation, 1 * view_scale, 12 * view_scale, GREEN, RED, BLUE);
         DrawText(TextFormat("Scale:%.2f;\nPos(%.2f;%.2f);\nTime step:%.4f\nFPS:%d", view_scale, steps[0]->pos.x, steps[0]->pos.y, delta,
                             GetFPS()), 10, 10, 16, BLACK);
-      EndDrawing();
+      EndDrawing(); */
     }
 
     // Result of throw 
@@ -81,11 +81,11 @@ int main (int argc, char *argv[]) {
       std::cout << "Hit ring\n";
     std::cout << "Throw accuracy: " << std::abs((right_x + left_x)/2 - steps[0]->pos.x) << "\n"
               << "Current deviation: " << steps[1]->pos.y - steps[0]->pos.y << "\nRequered: " << eps << "\n";
-    std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+    //std::this_thread::sleep_for(std::chrono::milliseconds(1500));
     delta *= 0.5; 
   } while(steps[1]->pos.y - steps[0]->pos.y > eps);
 
-  CloseWindow();
+  //CloseWindow();
 
   return 0;
 }
