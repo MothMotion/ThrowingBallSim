@@ -48,6 +48,8 @@ int main (int argc, char *argv[]) {
     *steps[0] = Step(atof(argv[1]), atof(argv[2]), atof(argv[4]), atof(argv[5]));
     *steps[1] = Step();
 
+    double flight_time = 0;
+
     //vec2 max_view(radius, radius);
     //double view_scale = 0;
 
@@ -55,7 +57,8 @@ int main (int argc, char *argv[]) {
     while(!registerHit(*steps[0], radius, eps, left_x, right_x, elevation) &&
           steps[0]->pos.y >= -eps) {
       nextStep(delta, grav, *steps[0], *steps[1]);
-      std::swap(steps[0], steps[1]); 
+      std::swap(steps[0], steps[1]);
+      flight_time += delta;
 
       // Visualisation, real time
       /* BeginDrawing();
@@ -80,7 +83,8 @@ int main (int argc, char *argv[]) {
     } else
       std::cout << "Hit ring\n";
     std::cout << "Throw accuracy: " << std::abs((right_x + left_x)/2 - steps[0]->pos.x) << "\n"
-              << "Current deviation: " << steps[1]->pos.y - steps[0]->pos.y << "\nRequered: " << eps << "\n";
+              << "Current deviation: " << steps[1]->pos.y - steps[0]->pos.y << "\nRequered: " << eps << "\n"
+              << "Flight time: " << flight_time << "\n";
     //std::this_thread::sleep_for(std::chrono::milliseconds(1500));
     delta *= 0.5; 
   } while(steps[1]->pos.y - steps[0]->pos.y > eps);
