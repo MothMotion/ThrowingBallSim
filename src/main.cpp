@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <cstdlib>
 #include <iostream>
 #include <thread>
@@ -16,7 +17,7 @@ constexpr double SFALLOFF = 0.9999;
 
 int main (int argc, char *argv[]) {
   if(argc != 13) {// x, y, radius, vx, vy, left_x, right_x, elevation, delta, eps, grav_x, grav_y
-    std::cout << "Invalid number of arguments!\nx y radius vx vy left_x right_x elevation delta eps grav_x grav_y";
+    std::cout << "Invalid number of arguments!\nx y radius vel angle left_x right_x elevation delta eps grav_x grav_y";
     return -1;
   }
 
@@ -46,14 +47,15 @@ int main (int argc, char *argv[]) {
 
   // Run simulation
   do { 
-    *steps[0] = Step(atof(argv[1]), atof(argv[2]), atof(argv[4]), atof(argv[5]));
+    *steps[0] = Step(atof(argv[1]), atof(argv[2]),
+                     atof(argv[4])*std::cos(atof(argv[5]) * PI/180), atof(argv[4])*std::sin(atof(argv[5]) * PI/180));
     *steps[1] = Step();
 
     vec2 max_view(radius, radius);
     double view_scale = 0;
     double flight_time = 0;
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+    //std::this_thread::sleep_for(std::chrono::milliseconds(1500));
     while(!registerHit(*steps[0], radius, eps, left_x, right_x, elevation) &&
           steps[0]->pos.y >= -eps) {
       nextStep(delta, grav, *steps[0], *steps[1]);
@@ -68,7 +70,7 @@ int main (int argc, char *argv[]) {
         view_scale = std::min(screenWidth / max_view.x, screenHeight / max_view.y); 
  
         drawStep(screenWidth, screenHeight, steps[0]->pos.x * view_scale, steps[0]->pos.y * view_scale, radius * view_scale,
-                 left_x * view_scale, right_x * view_scale, elevation, 1 * view_scale, 12 * view_scale, GREEN, RED, BLUE);
+                 left_x * view_scale, right_x * view_scale, elevation, 0.1 * view_scale, 1 * view_scale, GREEN, RED, BLUE);
         DrawText(TextFormat("Scale:%.2f;\nPos(%.2f;%.2f);\nTime step:%.4f\nFPS:%d", view_scale, steps[0]->pos.x, steps[0]->pos.y, delta,
                             GetFPS()), 10, 10, 16, BLACK);
       EndDrawing();
@@ -85,9 +87,9 @@ int main (int argc, char *argv[]) {
     std::cout << "Throw accuracy: " << std::abs((right_x + left_x)/2 - steps[0]->pos.x) << "\n"
               << "Current deviation: " << steps[1]->pos.y - steps[0]->pos.y << "\nRequered: " << eps << "\n"
               << "Flight Time: " << flight_time << "\n";
-    std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+    //std::this_thread::sleep_for(std::chrono::milliseconds(1500));
     delta *= 0.5; 
-  } while(steps[1]->pos.y - steps[0]->pos.y > eps);
+  } while(distance(steps[1]->pos, steps[0]->pos) > eps);
 
   CloseWindow();
 
